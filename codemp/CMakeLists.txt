@@ -98,6 +98,7 @@ if(BuildMPEngine OR BuildMPDed)
 		${SharedDir}
 		${MPDir}
 		"${GSLIncludeDirectory}"
+		${CMAKE_CURRENT_BINARY_DIR}/versionfile # Make sure the generated jofversion.h is found by all subsequent includes
 		)
 	set(MPBotlibBotlibFiles
 		"${MPDir}/botlib/aasfile.h"
