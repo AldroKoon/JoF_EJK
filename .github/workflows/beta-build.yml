@@ -1,13 +1,6 @@
 name: beta-windows-build
 
 on:
-  push:
-    branches:
-      - beta
-    paths-ignore:
-      - "**.md"
-      - ".gitignore"
-      - "docs/**"
   workflow_dispatch:   # Manual trigger
   schedule:           # Daily scheduled build at 00:00 UTC
     - cron: "0 0 * * *"
@@ -24,15 +17,17 @@ jobs:
         with:
           ref: beta
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Check for new commits since last beta build
+      - name: Determine if there are code changes
         id: check
         shell: bash
         run: |
-          # Get the latest beta tag (matches major.minor.buildnumber-beta)
+          # Get the latest beta tag (major.minor.buildnumber-beta)
           LAST_TAG=$(git tag --list "*-beta" --sort=-creatordate | head -n 1)
           echo "Last built tag: $LAST_TAG"
 
+          # If no previous tag exists, run build
           if [ -z "$LAST_TAG" ]; then
             echo "No previous beta builds, running build."
             echo "should_run=true" >> $GITHUB_OUTPUT
@@ -40,16 +35,18 @@ jobs:
           fi
 
           # Get commit of last tag
-          LAST_COMMIT=$(git rev-list -n 1 $LAST_TAG)
+          LAST_COMMIT=$(git rev-list -n 1 "$LAST_TAG")
           echo "Last commit: $LAST_COMMIT"
 
-          # Check if there are commits on beta since last build
-          CHANGES=$(git log $LAST_COMMIT..HEAD --oneline)
+          # Check for changes since last build, ignoring docs, md, and gitignore
+          CHANGES=$(git diff --name-only $LAST_COMMIT HEAD \
+            | grep -vE "(\.md$|^\.gitignore$|^docs/)")
+
           if [ -z "$CHANGES" ]; then
-            echo "No new changes since last build, skipping."
+            echo "No relevant changes since last build, skipping."
             echo "should_run=false" >> $GITHUB_OUTPUT
           else
-            echo "New changes detected, running build."
+            echo "Changes detected, running build."
             echo "should_run=true" >> $GITHUB_OUTPUT
 
   windows:
@@ -77,14 +74,13 @@ jobs:
         id: baseversion
         shell: bash
         run: |
-          MAJOR=$(grep JOF_VERSION_MAJOR versionfile/jofversion.h.in | sed -E 's/.*"(.+)".*/\1/')
-          MINOR=$(grep JOF_VERSION_MINOR versionfile/jofversion.h.in | sed -E 's/.*"(.+)".*/\1/')
+          MAJOR=$(grep JOF_VERSION_MAJOR codemp/versionfile/jofversion.h.in | sed -E 's/.*\"(.+)\".*/\1/')
+          MINOR=$(grep JOF_VERSION_MINOR codemp/versionfile/jofversion.h.in | sed -E 's/.*\"(.+)\".*/\1/')
 
           if [[ -z "$MAJOR" || -z "$MINOR" ]]; then
             echo "Failed to parse version"
             exit 1
           fi
-
           echo "major=$MAJOR" >> $GITHUB_OUTPUT
           echo "minor=$MINOR" >> $GITHUB_OUTPUT
 
@@ -103,7 +99,6 @@ jobs:
         shell: bash
         run: |
           mkdir -p external
-
           if [ "${{ matrix.arch }}" = "x86" ]; then
             ZIP_NAME=EternalJK-windows-x86.zip
             DLL_NAME=rd-vulkan_x86.dll
@@ -111,12 +106,9 @@ jobs:
             ZIP_NAME=EternalJK-windows-x86_64.zip
             DLL_NAME=rd-vulkan_x86_64.dll
           fi
-
           curl -L -o external/$ZIP_NAME \
             https://github.com/JKSunny/EternalJK/releases/download/latest/$ZIP_NAME
-
           unzip -j external/$ZIP_NAME "$DLL_NAME" -d external
-
           echo "RD_VULKAN_DLL=${{ github.workspace }}/external/$DLL_NAME" >> $GITHUB_ENV
 
       - name: Create build directory
@@ -155,7 +147,7 @@ jobs:
     name: Publish Beta Release
     needs: windows
     runs-on: ubuntu-22.04
-    if: github.ref == 'refs/heads/beta' && needs.check-changes.outputs.should_run == 'true'
+    if: needs.check-changes.outputs.should_run == 'true'
 
     steps:
       - name: Checkout beta branch
