@@ -1,7 +1,7 @@
 name: beta-windows-build
 
 on:
-  pull_request:
+  push:
     branches:
       - beta
     paths-ignore:
