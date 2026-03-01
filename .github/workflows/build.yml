@@ -1,4 +1,7 @@
-name: beta-windows-build
+name: windows-build
+
+permissions:
+  contents: write
 
 on:
   # Beta: build on push
@@ -138,6 +141,12 @@ jobs:
         run: |
           zip -r JoF-windows-x86.zip     JoF-beta-windows-x86
           zip -r JoF-windows-x86_64.zip  JoF-beta-windows-x86_64
+
+      - name: Setup git authentication for tag push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/JediofFreedom/JoF_EJK.git
 
       - name: Create version tag
         id: tag
@@ -335,6 +344,12 @@ jobs:
         run: |
           zip -r JoF-windows-x86.zip     JoF-master-windows-x86
           zip -r JoF-windows-x86_64.zip  JoF-master-windows-x86_64
+
+      - name: Setup git authentication for tag push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_PAT }}@github.com/JediofFreedom/JoF_EJK.git
 
       - name: Create version tag
         id: tag
