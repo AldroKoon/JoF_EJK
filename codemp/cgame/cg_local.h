@@ -416,6 +416,8 @@ typedef struct clientInfo_s {
 	int			deaths; //counted locally client-side, incase the server doesn't send this information already
 
 	qboolean	useAlternateStandAnim;
+	void		*holsterGhoul2;
+	void		*holsterGhoul2_2;
 } clientInfo_t;
 
 //rww - cheap looping sound struct
@@ -578,6 +580,11 @@ typedef struct centity_s {
 #if 1 //NPCLAGFIX2 adds this
 	qboolean		doLerp; // for entity position smoothing
 #endif
+	
+	unsigned int	flameSndDebounceTime;
+	unsigned int	flameThrowerHitTime;
+	qboolean		  flameThrowerSndActive;
+	qboolean	hasPlayedJetpackSounds;
 } centity_t;
 
 
@@ -856,6 +863,7 @@ typedef struct score_s {
 	int				deaths; //JAPRO - Scoreboard Deaths
 	qboolean		perfect;
 	int				team;
+	qboolean		fake;
 } score_t;
 
 
@@ -1787,6 +1795,13 @@ typedef struct cgMedia_s {
 	sfxHandle_t	count1Sound;
 	sfxHandle_t	countFightSound;
 
+	sfxHandle_t flameThrowerSound;
+	sfxHandle_t jetpackOnSound;
+	sfxHandle_t jetpackOn2Sound;
+	sfxHandle_t jetpackOffSound;
+	sfxHandle_t jetpackHoverSound;
+	sfxHandle_t jetpackHover2Sound;
+
 	// new stuff
 	qhandle_t patrolShader;
 	qhandle_t assaultShader;
@@ -2024,6 +2039,8 @@ typedef struct cgEffects_s {
 	fxHandle_t	waterBreath;
 	
 	fxHandle_t	rageFX;
+	fxHandle_t	flameThrowerVfx;
+	fxHandle_t	flameThrowerHit;
 } cgEffects_t;
 
 #define MAX_STATIC_MODELS 4000
@@ -2157,6 +2174,8 @@ typedef struct cgs_s {
 
 	int					numMiscStaticModels;
 	cg_staticmodel_t	miscStaticModels[MAX_STATIC_MODELS];
+
+	int				numClients;
 
 } cgs_t;
 
