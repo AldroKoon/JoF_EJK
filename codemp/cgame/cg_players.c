@@ -3252,7 +3252,7 @@ static void CG_SetLerpFrameAnimation( centity_t *cent, clientInfo_t *ci, lerpFra
 	int oldAnim = -1;
 	int blendTime = 100;
 	float oldSpeed = lf->animationSpeed;
-
+	
 	if (cent->localAnimIndex > 0)
 	{ //rockettroopers can't have broken arms, nor can anything else but humanoids
 		ci->brokenLimbs = cent->currentState.brokenLimbs;
@@ -9984,7 +9984,7 @@ void CG_DrawHolsteredSaber( centity_t *cent, int time, qhandle_t *gameModels, cl
 	if (cgs.serverMod != SVMOD_JAPLUS)
 		return;
 
-	if (cent->currentState.eFlags & EF_NOT_USED_3)
+	if (cent->currentState.eFlags & EF_BOBAFIRE)
 		return;
 
     if ( !cent->ghoul2 )
@@ -11286,6 +11286,8 @@ void CG_Player( centity_t *cent ) {
 		if (cent->currentState.legsAnim == BOTH_RUN2)
 			cent->currentState.legsAnim = BOTH_RUN1;*/
 	}
+		if (cent->currentState.activeForcePass && cent->currentState.eFlags & EF_BOBAFIRE && cent->currentState.NPC_class != CLASS_VEHICLE)
+			cent->currentState.torsoAnim = BOTH_FORCELIGHTNING_HOLD;
 
 	CG_G2PlayerAngles( cent, legs.axis, rootAngles );
 	CG_G2PlayerHeadAnims( cent );
@@ -11650,7 +11652,9 @@ skipTrail:
 	{ //keep track of death anim frame for when we copy off the bodyqueue
 		ci->frame = cent->pe.torso.frame;
 	}
-
+				
+				qboolean stopFlameThrowerSnd = qtrue;
+				
 	if (cent->currentState.activeForcePass > FORCE_LEVEL_3
 		&& cent->currentState.NPC_class != CLASS_VEHICLE)
 	{
@@ -11740,7 +11744,25 @@ skipTrail:
 
 		AnglesToAxis( fAng, axis );
 
-		if ( cent->currentState.activeForcePass > FORCE_LEVEL_2 )
+		if (cgs.serverMod >= SVMOD_JAPLUS
+		   && cent->currentState.eFlags & EF_BOBAFIRE)
+		{
+			if (cent->flameSndDebounceTime < cg.snap->serverTime)
+			{
+				cent->flameThrowerSndActive = qtrue;
+				cent->flameSndDebounceTime = cg.snap->serverTime + 2900;
+				trap->S_StartSound(
+				   cent->lerpOrigin, cent->currentState.number,
+				   CHAN_WEAPON,
+					cgs.media.flameThrowerSound
+				);
+			}
+
+			trap->FX_PlayEntityEffectID(cgs.effects.flameThrowerVfx, efOrg, axis, -1, -1, -1, -1);
+
+			stopFlameThrowerSnd = qfalse;
+		}
+		else if ( cent->currentState.activeForcePass > FORCE_LEVEL_2 )
 		{//arc
 			//trap->FX_PlayEffectID( cgs.effects.forceLightningWide, efOrg, fxDir );
 			//trap->FX_PlayEntityEffectID(cgs.effects.forceLightningWide, efOrg, axis, cent->boltInfo, cent->currentState.number, -1, -1);
@@ -11761,7 +11783,12 @@ skipTrail:
 		}
 		*/
 	}
-
+				
+				if (stopFlameThrowerSnd && cent->flameThrowerSndActive)
+				{
+					cent->flameThrowerSndActive = qfalse;
+					trap->S_MuteSound(cent->currentState.number, CHAN_WEAPON);
+				}
 	//fullbody push effect
 	if (cent->currentState.eFlags & EF_BODYPUSH)
 	{
