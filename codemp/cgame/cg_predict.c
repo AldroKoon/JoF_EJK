@@ -1144,8 +1144,8 @@ void CG_PredictPlayerState( void ) {
 
 		// Restore client-predicted weapon attack animation if still firing
 		// This prevents non-JaPRO servers from overwriting our correct prediction
-		if (cg.predictedPlayerState.weaponTime > 0 &&
-			savedTorsoAnim >= BOTH_ATTACK1 && savedTorsoAnim <= BOTH_THERMAL_THROW)
+		if (cg.predictedPlayerState.weaponTime > 0
+			&& savedTorsoAnim >= BOTH_ATTACK1 && savedTorsoAnim < BOTH_ATTACK5 && savedTorsoAnim > BOTH_ATTACK7 && savedTorsoAnim < BOTH_MELEE1 && savedTorsoAnim > BOTH_MELEE2 && savedTorsoAnim <= BOTH_THERMAL_THROW)
 		{
 			cg.predictedPlayerState.torsoAnim = savedTorsoAnim;
 		}
@@ -1164,8 +1164,9 @@ void CG_PredictPlayerState( void ) {
 
 		// Restore client-predicted weapon attack animation if still firing
 		// This prevents non-JaPRO servers from overwriting our correct prediction
-		if (cg.predictedPlayerState.weaponTime > 0 &&
-			savedTorsoAnim >= BOTH_ATTACK1 && savedTorsoAnim <= BOTH_THERMAL_THROW)
+		if (!cg.renderingThirdPerson
+			&& cg.predictedPlayerState.weaponTime > 0
+			&& savedTorsoAnim >= BOTH_ATTACK1 && savedTorsoAnim < BOTH_ATTACK5 && savedTorsoAnim > BOTH_ATTACK7 && savedTorsoAnim < BOTH_MELEE1 && savedTorsoAnim > BOTH_MELEE2 && savedTorsoAnim <= BOTH_THERMAL_THROW)
 		{
 			cg.predictedPlayerState.torsoAnim = savedTorsoAnim;
 		}
