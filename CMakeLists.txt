@@ -199,7 +199,7 @@ if(MSVC)
 	set(SharedDefines ${SharedDefines} "_CRT_NONSTDC_NO_DEPRECATE")
 	#set(SharedDefines ${SharedDefines} "WINDOWS_IGNORE_PACKING_MISMATCH")
 
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /EHsc /arch:SSE2 /we4013")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /EHsc /arch:SSE2 /we4013 /we4431")
 
 	#hax flags
 	set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELEASE} /Zi /DRELWITHDEBINFO")
