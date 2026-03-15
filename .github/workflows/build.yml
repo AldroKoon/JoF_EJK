@@ -193,8 +193,8 @@ jobs:
       matrix:
         include:
           - arch: x86_64
-            runner: macos-15
-            cmake_extra: "-DCMAKE_OSX_ARCHITECTURES=x86_64"
+            runner: macos-15-intel
+            cmake_extra: ""
           - arch: arm64
             runner: macos-15
             cmake_extra: "-DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64"
@@ -538,8 +538,8 @@ jobs:
       matrix:
         include:
           - arch: x86_64
-            runner: macos-15
-            cmake_extra: "-DCMAKE_OSX_ARCHITECTURES=x86_64"
+            runner: macos-15-intel
+            cmake_extra: ""
           - arch: arm64
             runner: macos-15
             cmake_extra: "-DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_SYSTEM_PROCESSOR=arm64"
