@@ -3663,7 +3663,7 @@ static void CL_MaxFPS_f(void) {
 	Cbuf_ExecuteText(EXEC_NOW, va("set com_maxFPS %s\n", Cmd_ArgsFrom(1)));
 }
 
-#define G2_VERT_SPACE_CLIENT_SIZE 256
+#define G2_VERT_SPACE_CLIENT_SIZE 1024
 
 /*
 ===============
