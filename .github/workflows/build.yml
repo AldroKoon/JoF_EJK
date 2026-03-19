@@ -167,7 +167,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
             -DUseInternalLibs=OFF \
             -DBuildPortableVersion=OFF \
-            -DJOF_VERSION_STRING="${{ needs.beta-version.outputs.display_version }}" \
+            -DJOF_VERSION_STRING=\"${{ needs.beta-version.outputs.display_version }}\" \
             -DGIT_SHA=${{ github.sha }} \
             -DGIT_BRANCH=${{ github.ref_name }}"
           if [ "${{ matrix.arch }}" = "x86" ]; then
@@ -522,7 +522,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
             -DUseInternalLibs=OFF \
             -DBuildPortableVersion=OFF \
-            -DJOF_VERSION_STRING=${{ needs.master-version.outputs.version }} \
+            -DJOF_VERSION_STRING=\"${{ needs.master-version.outputs.version }}\" \
             -DGIT_SHA=${{ github.sha }} \
             -DGIT_BRANCH=${{ github.ref_name }}"
           if [ "${{ matrix.arch }}" = "x86" ]; then
