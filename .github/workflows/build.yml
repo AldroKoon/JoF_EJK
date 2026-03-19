@@ -22,19 +22,13 @@ jobs:
   # =========================
   # BETA
   # =========================
-  windows:
+  beta-version:
     if: github.ref == 'refs/heads/beta' && github.event_name == 'push'
-    name: Windows ${{ matrix.arch }} Release (Beta)
-    runs-on: windows-2022
-    strategy:
-      matrix:
-        include:
-          - arch: x86
-            platform: Win32
-          - arch: x86_64
-            platform: x64
+    name: Compute Beta Version
+    runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      tag_version: ${{ steps.version.outputs.tag_version }}
+      display_version: ${{ steps.version.outputs.display_version }}
     steps:
       - name: Checkout beta branch
         uses: actions/checkout@v4
@@ -43,27 +37,45 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Read version from jofversion.h.in
-        id: baseversion
-        shell: bash
-        run: |
-          MAJOR=$(grep JOF_VERSION_MAJOR codemp/versionfile/jofversion.h.in | sed -E 's/.*\"(.+)\".*/\1/')
-          MINOR=$(grep JOF_VERSION_MINOR codemp/versionfile/jofversion.h.in | sed -E 's/.*\"(.+)\".*/\1/')
-
-          if [[ -z "$MAJOR" || -z "$MINOR" ]]; then
-            echo "Failed to parse version"
-            exit 1
-          fi
-          echo "major=$MAJOR" >> $GITHUB_OUTPUT
-          echo "minor=$MINOR" >> $GITHUB_OUTPUT
-
       - name: Compute beta version
         id: version
         shell: bash
         run: |
-          VERSION="${{ steps.baseversion.outputs.major }}.${{ steps.baseversion.outputs.minor }}.${{ github.run_number }}-beta"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Computed version: $VERSION"
+          # Find the latest non-beta release tag (e.g. 1.6.0)
+          LAST_RELEASE=$(git tag --list | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          if [ -z "$LAST_RELEASE" ]; then LAST_RELEASE="0.0.0"; fi
+          echo "Base release: $LAST_RELEASE"
+
+          # Count existing beta tags for this release to get next number
+          BETA_COUNT=$(git tag --list "${LAST_RELEASE}-beta.*" | wc -l | tr -d ' ')
+          BETA_NUM=$((BETA_COUNT + 1))
+
+          TAG_VERSION="${LAST_RELEASE}-beta.${BETA_NUM}"
+          DISPLAY_VERSION="${LAST_RELEASE} beta ${BETA_NUM}"
+
+          echo "tag_version=$TAG_VERSION" >> $GITHUB_OUTPUT
+          echo "display_version=$DISPLAY_VERSION" >> $GITHUB_OUTPUT
+          echo "Computed version: $TAG_VERSION (display: $DISPLAY_VERSION)"
+
+  windows:
+    if: github.ref == 'refs/heads/beta' && github.event_name == 'push'
+    name: Windows ${{ matrix.arch }} Release (Beta)
+    needs: beta-version
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        include:
+          - arch: x86
+            platform: Win32
+          - arch: x86_64
+            platform: x64
+    steps:
+      - name: Checkout beta branch
+        uses: actions/checkout@v4
+        with:
+          ref: beta
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
@@ -94,7 +106,7 @@ jobs:
           cmake .. -A ${{ matrix.platform }} \
             -DCMAKE_INSTALL_PREFIX=bin \
             -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_NUMBER=${{ github.run_number }} \
+            -DJOF_VERSION_STRING="${{ needs.beta-version.outputs.display_version }}" \
             -DGIT_SHA=${{ github.sha }} \
             -DGIT_BRANCH=${{ github.ref_name }} \
             -DEXTERNAL_RD_VULKAN_DLL="$RD_VULKAN_DLL"
@@ -119,6 +131,7 @@ jobs:
   linux:
     if: github.ref == 'refs/heads/beta' && github.event_name == 'push'
     name: Linux ${{ matrix.arch }} Release (Beta)
+    needs: beta-version
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -154,7 +167,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
             -DUseInternalLibs=OFF \
             -DBuildPortableVersion=OFF \
-            -DBUILD_NUMBER=${{ github.run_number }} \
+            -DJOF_VERSION_STRING="${{ needs.beta-version.outputs.display_version }}" \
             -DGIT_SHA=${{ github.sha }} \
             -DGIT_BRANCH=${{ github.ref_name }}"
           if [ "${{ matrix.arch }}" = "x86" ]; then
@@ -187,6 +200,7 @@ jobs:
   macos:
     if: github.ref == 'refs/heads/beta' && github.event_name == 'push'
     name: macOS ${{ matrix.arch }} Release (Beta)
+    needs: beta-version
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -220,7 +234,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
             -DUseInternalLibs=OFF \
             -DBuildPortableVersion=OFF \
-            -DBUILD_NUMBER=${{ github.run_number }} \
+            -DJOF_VERSION_STRING="${{ needs.beta-version.outputs.display_version }}" \
             -DGIT_SHA=${{ github.sha }} \
             -DGIT_BRANCH=${{ github.ref_name }}
 
@@ -251,7 +265,7 @@ jobs:
   publish-beta:
     if: github.ref == 'refs/heads/beta' && github.event_name == 'push'
     name: Publish Beta Release
-    needs: [windows, linux, macos]
+    needs: [beta-version, windows, linux, macos]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout beta branch
@@ -264,10 +278,10 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
 
-      - name: Read version from windows job
+      - name: Set version env vars
         run: |
-          VERSION="${{ needs.windows.outputs.version }}"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG_VERSION=${{ needs.beta-version.outputs.tag_version }}" >> $GITHUB_ENV
+          echo "DISPLAY_VERSION=${{ needs.beta-version.outputs.display_version }}" >> $GITHUB_ENV
 
       - name: Create archives
         run: |
@@ -287,9 +301,9 @@ jobs:
       - name: Create version tag
         id: tag
         run: |
-          git tag "$VERSION"
-          git push origin "$VERSION"
-          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+          git tag "$TAG_VERSION"
+          git push origin "$TAG_VERSION"
+          echo "tag=$TAG_VERSION" >> $GITHUB_OUTPUT
 
       - name: Update latest-beta tag
         run: |
@@ -300,7 +314,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          name: ${{ steps.tag.outputs.tag }}
+          name: ${{ env.DISPLAY_VERSION }}
           prerelease: true
           generate_release_notes: true
           files: |
@@ -364,18 +378,11 @@ jobs:
             echo "should_run=true" >> $GITHUB_OUTPUT
           fi
 
-  windows-master:
+  master-version:
     if: needs.check-master-changes.outputs.should_run == 'true'
-    name: Windows ${{ matrix.arch }} Release (Master)
+    name: Compute Master Version
     needs: check-master-changes
-    runs-on: windows-2022
-    strategy:
-      matrix:
-        include:
-          - arch: x86
-            platform: Win32
-          - arch: x86_64
-            platform: x64
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -386,8 +393,8 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Read version from jofversion.h.in
-        id: baseversion
+      - name: Compute release version
+        id: version
         shell: bash
         run: |
           MAJOR=$(grep JOF_VERSION_MAJOR codemp/versionfile/jofversion.h.in | sed -E 's/.*\"(.+)\".*/\1/')
@@ -397,16 +404,33 @@ jobs:
             echo "Failed to parse version"
             exit 1
           fi
-          echo "major=$MAJOR" >> $GITHUB_OUTPUT
-          echo "minor=$MINOR" >> $GITHUB_OUTPUT
 
-      - name: Compute release version (master)
-        id: version
-        shell: bash
-        run: |
-          VERSION="${{ steps.baseversion.outputs.major }}.${{ steps.baseversion.outputs.minor }}.${{ github.run_number }}"
+          # Count existing release tags for this MAJOR.MINOR to get next patch
+          PATCH=$(git tag --list "${MAJOR}.${MINOR}.*" | grep -v beta | wc -l | tr -d ' ')
+          VERSION="${MAJOR}.${MINOR}.${PATCH}"
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Computed version: $VERSION"
+
+  windows-master:
+    if: needs.check-master-changes.outputs.should_run == 'true'
+    name: Windows ${{ matrix.arch }} Release (Master)
+    needs: [check-master-changes, master-version]
+    runs-on: windows-2022
+    strategy:
+      matrix:
+        include:
+          - arch: x86
+            platform: Win32
+          - arch: x86_64
+            platform: x64
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
@@ -437,7 +461,7 @@ jobs:
           cmake .. -A ${{ matrix.platform }} \
             -DCMAKE_INSTALL_PREFIX=bin \
             -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_NUMBER=${{ github.run_number }} \
+            -DJOF_VERSION_STRING="${{ needs.master-version.outputs.version }}" \
             -DGIT_SHA=${{ github.sha }} \
             -DGIT_BRANCH=${{ github.ref_name }} \
             -DEXTERNAL_RD_VULKAN_DLL="$RD_VULKAN_DLL"
@@ -462,7 +486,7 @@ jobs:
   linux-master:
     if: needs.check-master-changes.outputs.should_run == 'true'
     name: Linux ${{ matrix.arch }} Release (Master)
-    needs: check-master-changes
+    needs: [check-master-changes, master-version]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -498,7 +522,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
             -DUseInternalLibs=OFF \
             -DBuildPortableVersion=OFF \
-            -DBUILD_NUMBER=${{ github.run_number }} \
+            -DJOF_VERSION_STRING=${{ needs.master-version.outputs.version }} \
             -DGIT_SHA=${{ github.sha }} \
             -DGIT_BRANCH=${{ github.ref_name }}"
           if [ "${{ matrix.arch }}" = "x86" ]; then
@@ -531,7 +555,7 @@ jobs:
   macos-master:
     if: needs.check-master-changes.outputs.should_run == 'true'
     name: macOS ${{ matrix.arch }} Release (Master)
-    needs: check-master-changes
+    needs: [check-master-changes, master-version]
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -565,7 +589,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
             -DUseInternalLibs=OFF \
             -DBuildPortableVersion=OFF \
-            -DBUILD_NUMBER=${{ github.run_number }} \
+            -DJOF_VERSION_STRING="${{ needs.master-version.outputs.version }}" \
             -DGIT_SHA=${{ github.sha }} \
             -DGIT_BRANCH=${{ github.ref_name }}
 
@@ -596,7 +620,7 @@ jobs:
   publish-master:
     if: needs.check-master-changes.outputs.should_run == 'true'
     name: Publish Master Release
-    needs: [check-master-changes, windows-master, linux-master, macos-master]
+    needs: [check-master-changes, master-version, windows-master, linux-master, macos-master]
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout master
@@ -609,10 +633,9 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
 
-      - name: Read version from windows-master job
+      - name: Set version env var
         run: |
-          VERSION="${{ needs.windows-master.outputs.version }}"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=${{ needs.master-version.outputs.version }}" >> $GITHUB_ENV
 
       - name: Create archives
         run: |

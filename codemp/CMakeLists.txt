@@ -42,8 +42,30 @@ if(GIT_BRANCH STREQUAL "master")
 endif()
 
 # Set default values if not defined
-if(NOT DEFINED BUILD_NUMBER)
-    set(BUILD_NUMBER "local")
+if(NOT DEFINED JOF_VERSION_STRING)
+    # Local build: find latest release tag and append "dev"
+    execute_process(
+        COMMAND git tag --list --sort=-version:refname
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE _all_tags
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    set(_latest_release "")
+    if(_all_tags)
+        string(REPLACE "\n" ";" _tag_list "${_all_tags}")
+        foreach(_tag IN LISTS _tag_list)
+            if(_tag MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
+                set(_latest_release "${_tag}")
+                break()
+            endif()
+        endforeach()
+    endif()
+    if(_latest_release)
+        set(JOF_VERSION_STRING "${_latest_release} dev")
+    else()
+        set(JOF_VERSION_STRING "dev")
+    endif()
 endif()
 
 if(NOT DEFINED GIT_SHA)
