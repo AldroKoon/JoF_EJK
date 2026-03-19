@@ -31,9 +31,9 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 #include "jofversion.h"
 
-#define JOFVERSION JOF_VERSION_STRING
+#define JOFVERSION JOF_VERSION_STRING JOF_VERSION_SUFFIX
 
-#define JOFCLIENTVERSION JOFVERSION " JoF"
+#define JOFCLIENTVERSION JOF_VERSION_STRING " JoF" JOF_VERSION_SUFFIX
 
 #define CLIENT_WINDOW_TITLE "EternalJK(JoF " JOFVERSION ")"
 #define CLIENT_CONSOLE_CORNER_DESCRIPTION "EternalJK(JoF " JOFVERSION ") - " JOF_COMMIT_SHA_SHORT
