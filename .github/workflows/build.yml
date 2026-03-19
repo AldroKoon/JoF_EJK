@@ -163,17 +163,19 @@ jobs:
         working-directory: ${{ github.workspace }}/build
         shell: bash
         run: |
-          OPTIONS="-DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
-            -DUseInternalLibs=OFF \
-            -DBuildPortableVersion=OFF \
-            -DJOF_VERSION_STRING=\"${{ needs.beta-version.outputs.display_version }}\" \
-            -DGIT_SHA=${{ github.sha }} \
-            -DGIT_BRANCH=${{ github.ref_name }}"
+          OPTIONS=(
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install
+            -DUseInternalLibs=OFF
+            -DBuildPortableVersion=OFF
+            "-DJOF_VERSION_STRING=${{ needs.beta-version.outputs.display_version }}"
+            -DGIT_SHA=${{ github.sha }}
+            -DGIT_BRANCH=${{ github.ref_name }}
+          )
           if [ "${{ matrix.arch }}" = "x86" ]; then
-            OPTIONS="$OPTIONS -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchains/linux-i686.cmake"
+            OPTIONS+=(-DCMAKE_TOOLCHAIN_FILE=cmake/Toolchains/linux-i686.cmake)
           fi
-          cmake $GITHUB_WORKSPACE $OPTIONS
+          cmake $GITHUB_WORKSPACE "${OPTIONS[@]}"
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
@@ -518,17 +520,19 @@ jobs:
         working-directory: ${{ github.workspace }}/build
         shell: bash
         run: |
-          OPTIONS="-DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
-            -DUseInternalLibs=OFF \
-            -DBuildPortableVersion=OFF \
-            -DJOF_VERSION_STRING=\"${{ needs.master-version.outputs.version }}\" \
-            -DGIT_SHA=${{ github.sha }} \
-            -DGIT_BRANCH=${{ github.ref_name }}"
+          OPTIONS=(
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install
+            -DUseInternalLibs=OFF
+            -DBuildPortableVersion=OFF
+            "-DJOF_VERSION_STRING=${{ needs.master-version.outputs.version }}"
+            -DGIT_SHA=${{ github.sha }}
+            -DGIT_BRANCH=${{ github.ref_name }}
+          )
           if [ "${{ matrix.arch }}" = "x86" ]; then
-            OPTIONS="$OPTIONS -DCMAKE_TOOLCHAIN_FILE=cmake/Toolchains/linux-i686.cmake"
+            OPTIONS+=(-DCMAKE_TOOLCHAIN_FILE=cmake/Toolchains/linux-i686.cmake)
           fi
-          cmake $GITHUB_WORKSPACE $OPTIONS
+          cmake $GITHUB_WORKSPACE "${OPTIONS[@]}"
 
       - name: Build
         working-directory: ${{ github.workspace }}/build
