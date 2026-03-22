@@ -124,6 +124,15 @@ jobs:
         shell: bash
         run: cmake --install . --config Release
 
+      - name: Download JoF base assets
+        shell: bash
+        run: |
+          mkdir -p build/bin/base
+          curl -L -o build/bin/base/JoF_Animations.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_Animations.pk3
+          curl -L -o build/bin/base/JoF_AssetsExtra.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_AssetsExtra.pk3
+
       - name: Upload Beta Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -191,6 +200,15 @@ jobs:
         shell: bash
         run: cmake --install .
 
+      - name: Download JoF base assets
+        shell: bash
+        run: |
+          mkdir -p ${{ github.workspace }}/install/JediAcademy/base
+          curl -L -o ${{ github.workspace }}/install/JediAcademy/base/JoF_Animations.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_Animations.pk3
+          curl -L -o ${{ github.workspace }}/install/JediAcademy/base/JoF_AssetsExtra.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_AssetsExtra.pk3
+
       - name: Create binary archive
         working-directory: ${{ github.workspace }}/install/JediAcademy
         shell: bash
@@ -254,6 +272,15 @@ jobs:
         working-directory: ${{ github.workspace }}/build
         shell: bash
         run: cmake --install .
+
+      - name: Download JoF base assets
+        shell: bash
+        run: |
+          mkdir -p ${{ github.workspace }}/install/JediAcademy/base
+          curl -L -o ${{ github.workspace }}/install/JediAcademy/base/JoF_Animations.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_Animations.pk3
+          curl -L -o ${{ github.workspace }}/install/JediAcademy/base/JoF_AssetsExtra.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_AssetsExtra.pk3
 
       - name: Create binary archive
         working-directory: ${{ github.workspace }}/install/JediAcademy
@@ -483,6 +510,15 @@ jobs:
         shell: bash
         run: cmake --install . --config Release
 
+      - name: Download JoF base assets
+        shell: bash
+        run: |
+          mkdir -p build/bin/base
+          curl -L -o build/bin/base/JoF_Animations.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_Animations.pk3
+          curl -L -o build/bin/base/JoF_AssetsExtra.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_AssetsExtra.pk3
+
       - name: Upload Master Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -549,6 +585,15 @@ jobs:
         shell: bash
         run: cmake --install .
 
+      - name: Download JoF base assets
+        shell: bash
+        run: |
+          mkdir -p ${{ github.workspace }}/install/JediAcademy/base
+          curl -L -o ${{ github.workspace }}/install/JediAcademy/base/JoF_Animations.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_Animations.pk3
+          curl -L -o ${{ github.workspace }}/install/JediAcademy/base/JoF_AssetsExtra.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_AssetsExtra.pk3
+
       - name: Create binary archive
         working-directory: ${{ github.workspace }}/install/JediAcademy
         shell: bash
@@ -611,6 +656,15 @@ jobs:
         working-directory: ${{ github.workspace }}/build
         shell: bash
         run: cmake --install .
+
+      - name: Download JoF base assets
+        shell: bash
+        run: |
+          mkdir -p ${{ github.workspace }}/install/JediAcademy/base
+          curl -L -o ${{ github.workspace }}/install/JediAcademy/base/JoF_Animations.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_Animations.pk3
+          curl -L -o ${{ github.workspace }}/install/JediAcademy/base/JoF_AssetsExtra.pk3 \
+            https://jofhub.eu/apps/cloud/repository/assets/JoF_AssetsExtra.pk3
 
       - name: Create binary archive
         working-directory: ${{ github.workspace }}/install/JediAcademy
