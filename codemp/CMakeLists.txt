@@ -719,6 +719,18 @@ if(BuildMPEngine)
 	set_target_properties(${MPEngine} PROPERTIES INCLUDE_DIRECTORIES "${MPEngineIncludeDirectories}")
 	set_target_properties(${MPEngine} PROPERTIES PROJECT_LABEL "MP Client")
 	target_link_libraries(${MPEngine} PRIVATE ${MPEngineLibraries} ${MPCGame} ${MPUI} ${MPVanillaRenderer})
+
+	# Ensure asset pk3s are built with the client and copied next to the exe
+	add_dependencies(${MPEngine} Assets)
+	add_custom_command(TARGET ${MPEngine} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${MPEngine}>/EternalJK"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			"${CMAKE_CURRENT_BINARY_DIR}/japro-assets.pk3"
+			"$<TARGET_FILE_DIR:${MPEngine}>/EternalJK/japro-assets.pk3"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			"${CMAKE_CURRENT_BINARY_DIR}/jofclient-assets.pk3"
+			"$<TARGET_FILE_DIR:${MPEngine}>/EternalJK/jofclient-assets.pk3"
+	)
 endif(BuildMPEngine)
 
 #        Dedicated Server (Engine) (jampded.exe)
@@ -857,10 +869,13 @@ endif()
 
 add_zip_command(japro-assets.pk3
 	FILES ${CMAKE_SOURCE_DIR}/assets/japro/*)
+add_zip_command(jofclient-assets.pk3
+	FILES ${CMAKE_SOURCE_DIR}/assets/jofclient/*)
 add_custom_target(Assets
 	ALL
-	DEPENDS japro-assets.pk3)
+	DEPENDS japro-assets.pk3 jofclient-assets.pk3)
 install(FILES
 		${CMAKE_CURRENT_BINARY_DIR}/japro-assets.pk3
+		${CMAKE_CURRENT_BINARY_DIR}/jofclient-assets.pk3
 	DESTINATION "${JKAInstallDir}/EternalJK"
 	COMPONENT ${JKAMPCoreComponent})
