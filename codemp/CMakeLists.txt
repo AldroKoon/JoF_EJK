@@ -722,30 +722,15 @@ if(BuildMPEngine)
 
 	# Ensure asset pk3s are built with the client and copied next to the exe
 	add_dependencies(${MPEngine} Assets)
-	if(MSVC)
-		# Use a wrapper target with explicit output dependency to avoid
-		# post-build race conditions with multi-config generators
-		add_custom_target(CopyAssets ALL
-			COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/$<CONFIG>/EternalJK"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				"${CMAKE_CURRENT_BINARY_DIR}/japro-assets.pk3"
-				"${CMAKE_BINARY_DIR}/$<CONFIG>/EternalJK/japro-assets.pk3"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				"${CMAKE_CURRENT_BINARY_DIR}/jofclient-assets.pk3"
-				"${CMAKE_BINARY_DIR}/$<CONFIG>/EternalJK/jofclient-assets.pk3"
-			DEPENDS Assets
-		)
-	else()
-		add_custom_command(TARGET ${MPEngine} POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${MPEngine}>/EternalJK"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				"${CMAKE_CURRENT_BINARY_DIR}/japro-assets.pk3"
-				"$<TARGET_FILE_DIR:${MPEngine}>/EternalJK/japro-assets.pk3"
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				"${CMAKE_CURRENT_BINARY_DIR}/jofclient-assets.pk3"
-				"$<TARGET_FILE_DIR:${MPEngine}>/EternalJK/jofclient-assets.pk3"
-		)
-	endif()
+	add_custom_command(TARGET ${MPEngine} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${MPEngine}>/EternalJK"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			"${CMAKE_CURRENT_BINARY_DIR}/japro-assets.pk3"
+			"$<TARGET_FILE_DIR:${MPEngine}>/EternalJK/japro-assets.pk3"
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			"${CMAKE_CURRENT_BINARY_DIR}/jofclient-assets.pk3"
+			"$<TARGET_FILE_DIR:${MPEngine}>/EternalJK/jofclient-assets.pk3"
+	)
 endif(BuildMPEngine)
 
 #        Dedicated Server (Engine) (jampded.exe)
