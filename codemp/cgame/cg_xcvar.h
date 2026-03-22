@@ -207,7 +207,6 @@ XCVAR_DEF( cg_grappleLineColor,					"1",		NULL,				CVAR_ARCHIVE_ND )
 //XCVAR_DEF( cg_predictRacemode,				"0",	NULL,					CVAR_ARCHIVE )
 XCVAR_DEF( cg_legstuck,							"0",	NULL,					CVAR_NONE )
 XCVAR_DEF( cg_specCameraMode,					"1",	NULL,					CVAR_ARCHIVE ) //ethan wants this archive
-XCVAR_DEF( cg_allowMemeVGS,						"0",	NULL,					CVAR_ARCHIVE )
 
 XCVAR_DEF( cg_centerHeight,						"0",	NULL,					CVAR_ARCHIVE )
 XCVAR_DEF( cg_centerSize,						"1",	NULL,					CVAR_ARCHIVE )

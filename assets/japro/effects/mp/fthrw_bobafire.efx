@@ -1,48 +1,50 @@
-repeatDelay				300
+repeatDelay				148
 
 Particle
 {
-	flags				usePhysics
+	flags				expensivePhysics useBBox usePhysics impactFx
 
-	spawnFlags			evenDistribution rgbComponentInterpolation
+	spawnFlags			cheapOrgCalc absoluteAccel evenDistribution rgbComponentInterpolation
 
-	count				30
+	life				700
 
-	life				800 1000
+	delay				200
 
-	delay				0 300
+	min					-1 -1 -1
+
+	max					1 1 1
 
 	origin				1 1 1 1 1 1
 
-	rotation			0 360
+	rotation			1
 
-	rotationDelta		-60 60
+	rotationDelta		20
 
-	velocity			100 5 5 150 5 5
+	velocity			320 10 10 400 10 10
 
-	acceleration		10 10 10 40 10 10
+	acceleration		10 10 10 50 10 10
 
-	rgb
+rgb
 	{
 		start			0 0 0.7333 0.1255 0.1255 1
 		end				1 1 1 0.9569 0.702 0.4667
-		parm			35 45
-		flags			nonlinear
+		parm			50 60
+		flags			linear
 	}
 
 	alpha
 	{
 		end				0
-		parm			60 75
+		parm			80 90
 		flags			linear nonlinear
 	}
 
 	size
 	{
 		start			2 3
-		end				20 30
+		end				30 55
 		parm			0 1
-		flags			wave
+		flags			linear
 	}
 
 	shaders
@@ -50,5 +52,10 @@ Particle
 		gfx/effects/fire2
 		gfx/effects/fire3
 		gfx/effects/fire4
+	]
+
+	impactfx
+	[
+		mp/wall_flame
 	]
 }
