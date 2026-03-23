@@ -127,10 +127,10 @@ jobs:
       - name: Download JoF base assets
         shell: bash
         run: |
-          mkdir -p build/bin/base
-          curl -L -o build/bin/base/JoF_Animations.pk3 \
+          mkdir -p build/bin/GameData/base
+          curl -L -o build/bin/GameData/base/JoF_Animations.pk3 \
             https://jofhub.eu/apps/cloud/repository/assets/JoF_Animations.pk3
-          curl -L -o build/bin/base/JoF_AssetsExtra.pk3 \
+          curl -L -o build/bin/GameData/base/JoF_AssetsExtra.pk3 \
             https://jofhub.eu/apps/cloud/repository/assets/JoF_AssetsExtra.pk3
 
       - name: Upload Beta Artifact
@@ -513,10 +513,10 @@ jobs:
       - name: Download JoF base assets
         shell: bash
         run: |
-          mkdir -p build/bin/base
-          curl -L -o build/bin/base/JoF_Animations.pk3 \
+          mkdir -p build/bin/GameData/base
+          curl -L -o build/bin/GameData/base/JoF_Animations.pk3 \
             https://jofhub.eu/apps/cloud/repository/assets/JoF_Animations.pk3
-          curl -L -o build/bin/base/JoF_AssetsExtra.pk3 \
+          curl -L -o build/bin/GameData/base/JoF_AssetsExtra.pk3 \
             https://jofhub.eu/apps/cloud/repository/assets/JoF_AssetsExtra.pk3
 
       - name: Upload Master Artifact
