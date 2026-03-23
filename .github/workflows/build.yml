@@ -47,9 +47,10 @@ jobs:
           if [ -z "$LAST_RELEASE" ]; then LAST_RELEASE="0.0.0"; fi
           echo "Base release: $LAST_RELEASE"
 
-          # Count existing beta tags for this release to get next number
-          BETA_COUNT=$(git tag --list "${LAST_RELEASE}-beta.*" | wc -l | tr -d ' ')
-          BETA_NUM=$((BETA_COUNT + 1))
+          # Find the highest existing beta number and increment
+          LAST_BETA=$(git tag --list "${LAST_RELEASE}-beta.*" | sed "s/${LAST_RELEASE}-beta\.//" | sort -n | tail -1)
+          if [ -z "$LAST_BETA" ]; then LAST_BETA=0; fi
+          BETA_NUM=$((LAST_BETA + 1))
 
           TAG_VERSION="${LAST_RELEASE}-beta.${BETA_NUM}"
           VERSION_SUFFIX=" beta ${BETA_NUM}"
