@@ -2940,8 +2940,10 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 				sID = trap->S_RegisterSound("sound/weapons/force/jump.mp3");
 				break;
 			case PDSOUND_FORCEGRIP:
+			{
 				sID = trap->S_RegisterSound("sound/weapons/force/grip.mp3");
 				break;
+			}
 			default:
 				break;
 			}

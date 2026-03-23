@@ -1113,6 +1113,7 @@ typedef struct cg_s {
 	score_t			scores[MAX_CLIENTS];
 	qboolean		showScores;
 	qboolean		scoreBoardShowing;
+	qboolean		pressingScoreBoard;
 	int				scoreFadeTime;
 	char			killerName[MAX_NETNAME];
 	char			spectatorList[MAX_STRING_CHARS];		// list of names
@@ -2039,6 +2040,7 @@ typedef struct cgEffects_s {
 	fxHandle_t	waterBreath;
 	
 	fxHandle_t	rageFX;
+	fxHandle_t	flameThrowerVfxBase;
 	fxHandle_t	flameThrowerVfx;
 	fxHandle_t	flameThrowerHit;
 } cgEffects_t;
@@ -2160,11 +2162,16 @@ typedef struct cgs_s {
 
 	float cursorX;
 	float cursorY;
-	qboolean eventHandling;
+	cgameEvent_t eventHandling;
 	qboolean mouseCaptured;
 	qboolean sizingHud;
 	void *capturedItem;
 	qhandle_t activeCursor;
+	qboolean radialMenuActive;
+	qboolean radialMenuExecuteOnClose;
+	int radialMenuSelection;
+	float radialMenuX;
+	float radialMenuY;
 
 	// media
 	cgMedia_t		media;
@@ -2231,6 +2238,8 @@ void CG_LogPrintf(fileHandle_t fileHandle, const char *fmt, ...); //chatlog
 void CG_KeyEvent(int key, qboolean down);
 void CG_MouseEvent(int x, int y);
 void CG_EventHandling(int type);
+void CG_RadialMenuSync(void);
+void CG_RadialMenuDraw(void);
 void CG_SetScoreSelection(void *menu);
 void CG_BuildSpectatorString(void);
 void CG_NextInventory_f(void);
