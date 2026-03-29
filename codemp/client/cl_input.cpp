@@ -34,7 +34,6 @@ int			old_com_frameTime;
 #define		CMDRATECAP_HZ 125
 #define		CMDRATECAP_MSEC (1000 / CMDRATECAP_HZ)   // = 8ms
 int         cmdratecap_lastFireTime;
-static int	lastCmdRateTime;
 
 float cl_mPitchOverride = 0.0f;
 float cl_mYawOverride = 0.0f;
@@ -1898,18 +1897,6 @@ void CL_CreateNewCommands( void ) {
 
 	old_com_frameTime = com_frameTime;
 
-	// Update rate limit tracking with overshoot preservation
-	if ( cl_cmdratecap->integer > 0 ) {
-		int minCmdMsec = 1000 / cl_cmdratecap->integer;
-		lastCmdRateTime += minCmdMsec;
-		// If we've fallen far behind (hitch, alt-tab), reset to prevent
-		// a burst of rapid commands that the server would just drop.
-		if ( com_frameTime - lastCmdRateTime >= minCmdMsec ) {
-			lastCmdRateTime = com_frameTime;
-		}
-	} else {
-		lastCmdRateTime = com_frameTime;
-	}
 	// generate a command for this frame
 	cl.cmdNumber++;
 	cmdNum = cl.cmdNumber & REAL_CMD_MASK;//Loda - FPS UNLOCK ENGINE
