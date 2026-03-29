@@ -1896,7 +1896,6 @@ void CL_CreateNewCommands( void ) {
 		frame_msec = 200;
 
 	old_com_frameTime = com_frameTime;
-
 	// generate a command for this frame
 	cl.cmdNumber++;
 	cmdNum = cl.cmdNumber & REAL_CMD_MASK;//Loda - FPS UNLOCK ENGINE
