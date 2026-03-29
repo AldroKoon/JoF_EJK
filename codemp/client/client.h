@@ -456,7 +456,7 @@ extern	cvar_t	*cl_noprint;
 extern	cvar_t	*cl_timegraph;
 extern	cvar_t	*cl_maxpackets;
 extern	cvar_t	*cl_packetdup;
-extern	cvar_t	*cl_maxcmdrate;
+extern	cvar_t  *cl_cmdratecap;
 #ifndef TOURNAMENT_CLIENT
 extern	cvar_t	*cl_timeNudge;
 #else

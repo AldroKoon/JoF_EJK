@@ -31,6 +31,9 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 #endif
 unsigned	frame_msec;
 int			old_com_frameTime;
+#define		CMDRATECAP_HZ 125
+#define		CMDRATECAP_MSEC (1000 / CMDRATECAP_HZ)   // = 8ms
+int         cmdratecap_lastFireTime;
 static int	lastCmdRateTime;
 
 float cl_mPitchOverride = 0.0f;
@@ -1860,16 +1863,24 @@ void CL_CreateNewCommands( void ) {
 	if ( cls.state < CA_PRIMED )
 		return;
 
-	// Cap command generation rate independently from the render frame rate.
-	// This prevents the server from dropping commands that arrive too close
-	// together (e.g. server rejects cmds with < 5ms delta).
-	// Button presses survive skipped frames via the wasPressed mechanism.
-	// Uses a separate timer (lastCmdRateTime) so frame_msec stays accurate
-	// for movement calculations.
-	if ( cl_maxcmdrate->integer > 0 ) {
-		int minCmdMsec = 1000 / cl_maxcmdrate->integer;
-		if ( com_frameTime - lastCmdRateTime < minCmdMsec ) {
+	// cl_cmdratecap: when enabled, cap command generation at 125Hz.
+	// Uses fixed-step accumulator — advance by CMDRATECAP_MSEC on fire,
+	// carrying overshoot forward so cmds land at steady 8ms intervals.
+	// Button wasPressed and gcmdValue persist across skipped frames naturally.
+	if (cl_cmdratecap->integer) {
+		int elapsed = com_frameTime - cmdratecap_lastFireTime;
+		if (elapsed < CMDRATECAP_MSEC) {
 			return;
+		}
+
+		// Advance by exactly CMDRATECAP_MSEC, not com_frameTime.
+		// This preserves overshoot so we average exactly 125 cmds/sec.
+		cmdratecap_lastFireTime += CMDRATECAP_MSEC;
+
+		// Safety clamp: if we fell way behind (hitch/alt-tab), snap forward
+		// to prevent a burst of rapid cmds trying to catch up.
+		if (com_frameTime - cmdratecap_lastFireTime > CMDRATECAP_MSEC * 2) {
+			cmdratecap_lastFireTime = com_frameTime;
 		}
 	}
 
@@ -1888,8 +1899,8 @@ void CL_CreateNewCommands( void ) {
 	old_com_frameTime = com_frameTime;
 
 	// Update rate limit tracking with overshoot preservation
-	if ( cl_maxcmdrate->integer > 0 ) {
-		int minCmdMsec = 1000 / cl_maxcmdrate->integer;
+	if ( cl_cmdratecap->integer > 0 ) {
+		int minCmdMsec = 1000 / cl_cmdratecap->integer;
 		lastCmdRateTime += minCmdMsec;
 		// If we've fallen far behind (hitch, alt-tab), reset to prevent
 		// a burst of rapid commands that the server would just drop.
@@ -2289,6 +2300,7 @@ void CL_InitInput( void ) {
 	cl_debugMove = Cvar_Get ("cl_debugMove", "0", 0);
 
 	cl_idrive = Cvar_Get ("cl_idrive", "0", CVAR_ARCHIVE);//JAPRO ENGINE
+	cmdratecap_lastFireTime = 0;
 }
 
 /*
