@@ -41,6 +41,7 @@ typedef struct cmd_s {
 int			cmd_wait;
 cmd_t		cmd_text;
 byte		cmd_text_buf[MAX_CMD_BUFFER];
+extern	cvar_t*	cl_cmdratecap;
 
 //=============================================================================
 
@@ -187,9 +188,18 @@ void Cbuf_Execute (void)
 
 	while (cmd_text.cursize)
 	{
-		if ( cmd_wait > 0 ) {
+		if (cmd_wait > 0) {
 			// skip out while text still remains in buffer, leaving it
 			// for next frame
+			if (cl_cmdratecap && cl_cmdratecap->integer) {
+				// Only decrement on command-rate frames so wait-based
+				// scripts keep the same real-world timing as 125 FPS
+				extern int cmdratecap_lastFireTime;
+				extern int com_frameTime;
+				if (com_frameTime - cmdratecap_lastFireTime < (1000 / 125)) {
+					break; // not a command frame, don't tick wait
+				}
+			}
 			cmd_wait--;
 			break;
 		}
