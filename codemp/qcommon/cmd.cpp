@@ -191,16 +191,11 @@ void Cbuf_Execute (void)
 	while (cmd_text.cursize)
 	{
 		if (cmd_wait > 0) {
-			// skip out while text still remains in buffer, leaving it
-			// for next frame
 #ifndef DEDICATED
 			if (cl_cmdratecap && cl_cmdratecap->integer) {
-				// Only decrement on command-rate frames so wait-based
-				// scripts keep the same real-world timing as 125 FPS
-				extern int cmdratecap_lastFireTime;
-				extern int com_frameTime;
-				if (com_frameTime - cmdratecap_lastFireTime < (1000 / 125)) {
-					break; // not a command frame, don't tick wait
+				extern int cmdratecap_commandGenerated;
+				if (!cmdratecap_commandGenerated) {
+					break;
 				}
 			}
 #endif

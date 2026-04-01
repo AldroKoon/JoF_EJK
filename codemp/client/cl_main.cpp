@@ -2840,6 +2840,8 @@ void CL_Frame ( int msec ) {
 	}
 
 	// send intentions now
+	extern int cmdratecap_commandGenerated;
+	cmdratecap_commandGenerated = 0;
 	CL_SendCmd();
 
 	// resend a connection request if necessary

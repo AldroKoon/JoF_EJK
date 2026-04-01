@@ -34,6 +34,7 @@ int			old_com_frameTime;
 #define		CMDRATECAP_HZ 125
 #define		CMDRATECAP_MSEC (1000 / CMDRATECAP_HZ)   // = 8ms
 int         cmdratecap_lastFireTime;
+int			cmdratecap_commandGenerated = 0;
 
 float cl_mPitchOverride = 0.0f;
 float cl_mYawOverride = 0.0f;
@@ -1897,6 +1898,7 @@ void CL_CreateNewCommands( void ) {
 
 	old_com_frameTime = com_frameTime;
 	// generate a command for this frame
+	cmdratecap_commandGenerated = 1;
 	cl.cmdNumber++;
 	cmdNum = cl.cmdNumber & REAL_CMD_MASK;//Loda - FPS UNLOCK ENGINE
 	cl.cmds[cmdNum] = CL_CreateCmd ();
