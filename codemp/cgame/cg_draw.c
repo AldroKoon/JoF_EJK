@@ -7417,7 +7417,7 @@ static void CG_DrawCrosshair( vec3_t worldPoint, int chEntValid ) {
 
 	//draw a health bar directly under the crosshair if we're looking at something
 	//that takes damage
-	if (crossEnt && crossEnt->currentState.maxhealth && cg_drawPlayerNames.integer < 2)//loda
+	if (crossEnt && crossEnt->currentState.maxhealth)//loda
 	{
 		// Only require Force Sense 3 for NPC health bars NOT placed by mapper (shouldtarget = mapper's showhealth 1)
 		if (!(crossEnt->currentState.number >= MAX_CLIENTS
