@@ -12016,18 +12016,6 @@ static void CG_PlayerLabels(void)
 			continue;
 
 		CG_DrawScaledProportionalString(x, y, cgs.clientinfo[i].name, UI_CENTER, colorTable[CT_WHITE], cg_drawPlayerNamesScale.value);
-
-		if (cg_drawPlayerNames.integer > 1 && cent->currentState.maxhealth)
-		{
-			if (!(cent->currentState.number >= MAX_CLIENTS
-				&& cent->currentState.eType == ET_NPC
-				&& !cent->currentState.shouldtarget
-				&& !(cg.predictedPlayerState.fd.forcePowersActive & (1 << FP_SEE)
-					&& cg.predictedPlayerState.fd.forcePowerLevel[FP_SEE] >= 3)))
-			{
-				CG_DrawHealthBar(cent, x, y - 16, 1, 1);
-			}
-		}
 	}
 }
 
