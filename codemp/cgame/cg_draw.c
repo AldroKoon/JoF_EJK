@@ -7417,10 +7417,17 @@ static void CG_DrawCrosshair( vec3_t worldPoint, int chEntValid ) {
 
 	//draw a health bar directly under the crosshair if we're looking at something
 	//that takes damage
-	if (crossEnt &&	crossEnt->currentState.maxhealth && cg_drawPlayerNames.integer < 2)//loda
+	if (crossEnt && crossEnt->currentState.maxhealth && cg_drawPlayerNames.integer < 2)//loda
 	{
-		CG_DrawHealthBar(crossEnt, chX, chY, w, h);
-		chY += HEALTH_HEIGHT*2;
+		// Only require Force Sense 3 for NPC health bars (not map entities like func_breakable)
+		if (!(crossEnt->currentState.number >= MAX_CLIENTS
+			&& crossEnt->currentState.eType == ET_NPC
+			&& !(cg.predictedPlayerState.fd.forcePowersActive & (1 << FP_SEE)
+				&& cg.predictedPlayerState.fd.forcePowerLevel[FP_SEE] >= 3)))
+		{
+			CG_DrawHealthBar(crossEnt, chX, chY, w, h);
+			chY += HEALTH_HEIGHT * 2;
+		}
 	}
 	else if (crossEnt && crossEnt->currentState.number < MAX_CLIENTS)
 	{
@@ -12010,7 +12017,15 @@ static void CG_PlayerLabels(void)
 		CG_DrawScaledProportionalString(x, y, cgs.clientinfo[i].name, UI_CENTER, colorTable[CT_WHITE], cg_drawPlayerNamesScale.value);
 
 		if (cg_drawPlayerNames.integer > 1 && cent->currentState.maxhealth)
-			CG_DrawHealthBar(cent, x, y-16, 1, 1);
+		{
+			if (!(cent->currentState.number >= MAX_CLIENTS
+				&& cent->currentState.eType == ET_NPC
+				&& !(cg.predictedPlayerState.fd.forcePowersActive & (1 << FP_SEE)
+					&& cg.predictedPlayerState.fd.forcePowerLevel[FP_SEE] >= 3)))
+			{
+				CG_DrawHealthBar(cent, x, y - 16, 1, 1);
+			}
+		}
 	}
 }
 
