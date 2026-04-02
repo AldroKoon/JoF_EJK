@@ -7419,9 +7419,10 @@ static void CG_DrawCrosshair( vec3_t worldPoint, int chEntValid ) {
 	//that takes damage
 	if (crossEnt && crossEnt->currentState.maxhealth && cg_drawPlayerNames.integer < 2)//loda
 	{
-		// Only require Force Sense 3 for NPC health bars (not map entities like func_breakable)
+		// Only require Force Sense 3 for NPC health bars NOT placed by mapper (shouldtarget = mapper's showhealth 1)
 		if (!(crossEnt->currentState.number >= MAX_CLIENTS
 			&& crossEnt->currentState.eType == ET_NPC
+			&& !crossEnt->currentState.shouldtarget
 			&& !(cg.predictedPlayerState.fd.forcePowersActive & (1 << FP_SEE)
 				&& cg.predictedPlayerState.fd.forcePowerLevel[FP_SEE] >= 3)))
 		{
@@ -12020,6 +12021,7 @@ static void CG_PlayerLabels(void)
 		{
 			if (!(cent->currentState.number >= MAX_CLIENTS
 				&& cent->currentState.eType == ET_NPC
+				&& !cent->currentState.shouldtarget
 				&& !(cg.predictedPlayerState.fd.forcePowersActive & (1 << FP_SEE)
 					&& cg.predictedPlayerState.fd.forcePowerLevel[FP_SEE] >= 3)))
 			{
