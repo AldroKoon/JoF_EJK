@@ -57,6 +57,7 @@ cvar_t	*rconAddress;
 cvar_t	*cl_timeout;
 cvar_t	*cl_maxpackets;
 cvar_t	*cl_packetdup;
+cvar_t	*cl_cmdratecap;
 #ifndef TOURNAMENT_CLIENT
 cvar_t	*cl_timeNudge;
 #endif
@@ -2839,6 +2840,8 @@ void CL_Frame ( int msec ) {
 	}
 
 	// send intentions now
+	extern int cmdratecap_commandGenerated;
+	cmdratecap_commandGenerated = 0;
 	CL_SendCmd();
 
 	// resend a connection request if necessary
@@ -3818,6 +3821,7 @@ void CL_Init( void ) {
 
 	cl_maxpackets = Cvar_Get ("cl_maxpackets", "125", CVAR_ARCHIVE );
 	cl_packetdup = Cvar_Get ("cl_packetdup", "1", CVAR_ARCHIVE_ND );
+	cl_cmdratecap = Cvar_Get("cl_cmdratecap", "0", CVAR_ARCHIVE);
 
 #ifndef TOURNAMENT_CLIENT
 	cl_timeNudge = Cvar_Get ("cl_timeNudge", "0", CVAR_TEMP );
